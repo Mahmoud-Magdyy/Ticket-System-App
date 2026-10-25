@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "730742964924",
+    "project_id": "ck-ticket-system",
+    "storage_bucket": "ck-ticket-system.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730742964924:android:d870cd1e35d9892cf486b9",
+        "android_client_info": {
+          "package_name": "com.example.ck_ticket"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB8j-X8vKGx6CNSQyaDX2OPyLaFo_9l7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
