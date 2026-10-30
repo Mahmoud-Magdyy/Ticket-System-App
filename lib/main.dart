@@ -81,7 +81,12 @@ void initState() {
 }
 
 Future<void> _initNotifications() async {
-  await _createNotificationChannel(); // ✅ ننتظرها تخلص الأول
+  await _createNotificationChannel(); 
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
   _setupForegroundNotifications();
   _setupNotificationClickHandling();
 }
@@ -142,7 +147,17 @@ void _navigateToTarget(Map<String, dynamic> data) {
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
-    const initSettings = InitializationSettings(android: androidSettings);
+    // ✅ iOS: لازم settings للـ iOS وإلا initialize بترمي ArgumentError
+    // الـ permission بيتطلب من FirebaseMessaging.requestPermission
+    const darwinSettings = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: darwinSettings,
+    );
     _localNotifications.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (details) {
@@ -152,6 +167,7 @@ void _navigateToTarget(Map<String, dynamic> data) {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('📩 Foreground message: ${message.notification?.title}');
+      if (Platform.isIOS) return; // ✅ iOS بيعرضه لوحده، عشان الإشعار ميتكررش
       _localNotifications.show(
         message.hashCode,
         message.notification?.title,
@@ -209,6 +225,12 @@ void _navigateToTarget(Map<String, dynamic> data) {
       debugPrint('👤 Username من الكوكي: $username');
 
       // 2. هات الـ FCM Token
+      // ✅ iOS: لازم APNs token يكون جاهز الأول، وإلا getToken بترمي apns-token-not-set
+      if (Platform.isIOS &&
+          await FirebaseMessaging.instance.getAPNSToken() == null) {
+        debugPrint('⚠️ APNs Token لسه مش جاهز، هنحاول تاني في التنقل الجاي');
+        return;
+      }
       final fcmToken = await FirebaseMessaging.instance.getToken();
       if (fcmToken == null) {
         debugPrint('⚠️ لم يتم الحصول على FCM Token');
